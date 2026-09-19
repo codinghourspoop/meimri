@@ -14,7 +14,7 @@ import (
 	"gitlab.com/coding4hours/memri/icons"
 )
 
-func CardFragment(title, description string, cards []CardInput) templ.Component {
+func CardFragment(deckID int64, title, description string, cards []CardInput) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -48,7 +48,7 @@ func CardFragment(title, description string, cards []CardInput) templ.Component 
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</h1><p class=\"mt-2 text-base-content/70\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</h1><p class=\"mt-2 text-base-content/80\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -61,69 +61,82 @@ func CardFragment(title, description string, cards []CardInput) templ.Component 
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</p></div><div x-data=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</p><div class=\"mt-4 flex items-center justify-center\"><div class=\"inline-flex items-center rounded-full border border-base-300 bg-base-200 p-1\"><span class=\"btn btn-sm btn-primary rounded-full px-4\">Flashcards</span> <a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmt.Sprintf("flashcards(%d)", len(cards)))
+		var templ_7745c5c3_Var4 templ.SafeURL
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/decks/%d/learn", deckID)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/decks.templ`, Line: 17, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/decks.templ`, Line: 18, Col: 67}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" x-on:keydown.window=\"onKey($event)\" class=\"mx-auto w-full max-w-md\"><div class=\"[perspective:1000px]\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"btn btn-sm btn-ghost rounded-full px-4\">Learn</a></div></div></div><div x-data=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmt.Sprintf("flashcards(%d)", len(cards)))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/decks.templ`, Line: 23, Col: 52}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" x-on:keydown.window=\"onKey($event)\" class=\"mx-auto w-full max-w-md\"><div class=\"[perspective:1000px]\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for index, item := range cards {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div x-show=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmt.Sprintf("currentCard === %d", index))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/decks.templ`, Line: 23, Col: 58}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\"><button type=\"button\" x-on:click=\"flip()\" x-bind:aria-label=\"flipped ? 'Show question' : 'Show answer'\" class=\"relative h-80 w-full text-left transition-transform duration-300 [transform-style:preserve-3d]\" x-bind:class=\"flipped ? '[transform:rotateX(180deg)]' : '[transform:rotateX(0deg)]'\"><div class=\"card bg-base-100 border-base-300 absolute inset-0 flex items-center justify-center border p-8 text-center shadow-xl [backface-visibility:hidden]\"><p class=\"text-xl font-medium\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div x-show=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(item.Front)
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmt.Sprintf("currentCard === %d", index))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/decks.templ`, Line: 33, Col: 20}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/decks.templ`, Line: 29, Col: 58}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</p></div><div class=\"card bg-primary/10 border-primary/20 absolute inset-0 flex items-center justify-center border p-8 text-center shadow-xl [backface-visibility:hidden] [transform:rotateX(180deg)]\"><p class=\"text-lg\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\"><button type=\"button\" x-on:click=\"flip()\" x-bind:aria-label=\"flipped ? 'Show question' : 'Show answer'\" class=\"relative h-80 w-full text-left transition-transform duration-300 [transform-style:preserve-3d]\" x-bind:class=\"flipped ? '[transform:rotateX(180deg)]' : '[transform:rotateX(0deg)]'\"><div class=\"card bg-base-100 border-base-300 absolute inset-0 flex items-center justify-center border p-8 text-center shadow-xl [backface-visibility:hidden]\"><p class=\"text-xl font-medium\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(item.Back)
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(item.Front)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/decks.templ`, Line: 38, Col: 19}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/decks.templ`, Line: 39, Col: 20}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</p></div></button></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</p></div><div class=\"card bg-primary/10 border-primary/20 absolute inset-0 flex items-center justify-center border p-8 text-center shadow-xl [backface-visibility:hidden] [transform:rotateX(180deg)]\"><p class=\"text-lg\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var8 string
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(item.Back)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/decks.templ`, Line: 44, Col: 19}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</p></div></button></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div><p class=\"mt-4 text-center text-sm text-base-content/60\">Click the card or press <span class=\"kbd kbd-xs\">space</span> to flip it · <span class=\"kbd kbd-xs\">←</span> <span class=\"kbd kbd-xs\">→</span> to navigate</p><div class=\"card bg-base-200 mt-2 shadow-sm\"><div class=\"card-body flex-row items-center justify-between p-2\"><button type=\"button\" x-on:click=\"prev()\" x-bind:disabled=\"currentCard === 0\" class=\"btn btn-ghost\" aria-label=\"Previous card\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div><p class=\"mt-4 text-center text-sm text-base-content/75\">Click the card or press <span class=\"kbd kbd-xs\">space</span> to flip it · <span class=\"kbd kbd-xs\">←</span> <span class=\"kbd kbd-xs\">→</span> to navigate</p><div class=\"card bg-base-200 mt-2 shadow-sm\"><div class=\"card-body flex-row items-center justify-between p-2\"><button type=\"button\" x-on:click=\"prev()\" x-bind:disabled=\"currentCard === 0\" class=\"btn btn-ghost\" aria-label=\"Previous card\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -131,7 +144,7 @@ func CardFragment(title, description string, cards []CardInput) templ.Component 
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</button> <span class=\"font-mono text-sm\" x-text=\"`${currentCard + 1}/${total}`\"></span> <button type=\"button\" x-on:click=\"next()\" x-bind:disabled=\"currentCard === total - 1\" class=\"btn btn-ghost\" aria-label=\"Next card\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</button> <span class=\"font-mono text-sm\" x-text=\"`${currentCard + 1}/${total}`\"></span> <button type=\"button\" x-on:click=\"next()\" x-bind:disabled=\"currentCard === total - 1\" class=\"btn btn-ghost\" aria-label=\"Next card\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -139,7 +152,7 @@ func CardFragment(title, description string, cards []CardInput) templ.Component 
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</button></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</button></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -163,12 +176,12 @@ func DeckSearch() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var8 == nil {
-			templ_7745c5c3_Var8 = templ.NopComponent
+		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var9 == nil {
+			templ_7745c5c3_Var9 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<section class=\"mx-auto mt-8 max-w-2xl\"><label class=\"input w-full\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<section class=\"mx-auto mt-8 max-w-2xl\"><label class=\"input w-full\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -176,7 +189,7 @@ func DeckSearch() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<input name=\"q\" placeholder=\"Search decks...\" autocomplete=\"off\" class=\"w-full\" hx-post=\"/api/decks/search\" hx-trigger=\"input changed delay:250ms\" hx-target=\"#deck-search-results\" hx-swap=\"innerHTML\"></label><div id=\"deck-search-results\" class=\"mt-4 space-y-2\" aria-live=\"polite\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<input name=\"q\" placeholder=\"Search decks...\" autocomplete=\"off\" class=\"w-full\" hx-post=\"/api/decks/search\" hx-trigger=\"input changed delay:250ms\" hx-target=\"#deck-search-results\" hx-swap=\"innerHTML\"></label><div id=\"deck-search-results\" class=\"mt-4 space-y-2\" aria-live=\"polite\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -184,7 +197,7 @@ func DeckSearch() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</div></section>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></section>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -208,12 +221,12 @@ func NewDeckPage(isAuthed bool, unread int64) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var9 == nil {
-			templ_7745c5c3_Var9 = templ.NopComponent
+		templ_7745c5c3_Var10 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var10 == nil {
+			templ_7745c5c3_Var10 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var10 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var11 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -225,7 +238,7 @@ func NewDeckPage(isAuthed bool, unread int64) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div class=\"mx-auto max-w-2xl\" x-data=\"newDeckForm()\"><h1 class=\"text-2xl font-bold\">New deck</h1><form hx-post=\"/api/decks/create\" hx-swap=\"none\" class=\"mt-6 space-y-4\"><fieldset class=\"fieldset\"><legend class=\"fieldset-legend\">Title</legend> <input name=\"title\" required class=\"input w-full\" placeholder=\"Deck title\"></fieldset><fieldset class=\"fieldset\"><legend class=\"fieldset-legend\">Description</legend> <input name=\"description\" class=\"input w-full\" placeholder=\"What is this deck about?\"></fieldset><div class=\"space-y-2\"><span class=\"fieldset-legend\">Cards</span><template x-for=\"(card, i) in cards\" x-bind:key=\"i\"><div class=\"flex gap-2\"><input name=\"front\" x-model=\"card.front\" class=\"input w-full\" placeholder=\"Front\"> <input name=\"back\" x-model=\"card.back\" class=\"input w-full\" placeholder=\"Back\"> <button type=\"button\" class=\"btn btn-ghost btn-square shrink-0\" aria-label=\"Remove card\" x-on:click=\"removeCard(i)\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div class=\"mx-auto max-w-2xl\" x-data=\"newDeckForm()\"><h1 class=\"text-2xl font-bold\">New deck</h1><form hx-post=\"/api/decks/create\" hx-swap=\"none\" class=\"mt-6 space-y-4\"><fieldset class=\"fieldset\"><legend class=\"fieldset-legend\">Title</legend> <input name=\"title\" required class=\"input w-full\" placeholder=\"Deck title\"></fieldset><fieldset class=\"fieldset\"><legend class=\"fieldset-legend\">Description</legend> <input name=\"description\" class=\"input w-full\" placeholder=\"What is this deck about?\"></fieldset><div class=\"space-y-2\"><span class=\"fieldset-legend\">Cards</span><template x-for=\"(card, i) in cards\" x-bind:key=\"i\"><div class=\"flex gap-2\"><input name=\"front\" x-model=\"card.front\" class=\"input w-full\" placeholder=\"Front\"> <input name=\"back\" x-model=\"card.back\" class=\"input w-full\" placeholder=\"Back\"> <button type=\"button\" class=\"btn btn-ghost btn-square shrink-0\" aria-label=\"Remove card\" x-on:click=\"removeCard(i)\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -233,7 +246,7 @@ func NewDeckPage(isAuthed bool, unread int64) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</button></div></template><div class=\"aura\"><button type=\"button\" class=\"btn btn-sm\" x-on:click=\"addCard()\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</button></div></template><div class=\"aura\"><button type=\"button\" class=\"btn btn-sm\" x-on:click=\"addCard()\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -241,13 +254,13 @@ func NewDeckPage(isAuthed bool, unread int64) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "Add card</button></div></div><button type=\"submit\" class=\"btn btn-primary\">Create deck</button></form></div><script>\n\t\t\tfunction newDeckForm() {\n\t\t\t\treturn {\n\t\t\t\t\tcards: [{ front: \"\", back: \"\" }],\n\t\t\t\t\taddCard() {\n\t\t\t\t\t\tthis.cards.push({ front: \"\", back: \"\" });\n\t\t\t\t\t},\n\t\t\t\t\tremoveCard(i) {\n\t\t\t\t\t\tthis.cards.splice(i, 1);\n\t\t\t\t\t\tif (this.cards.length === 0) this.addCard();\n\t\t\t\t\t},\n\t\t\t\t};\n\t\t\t}\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "Add card</button></div></div><button type=\"submit\" class=\"btn btn-primary\">Create deck</button></form></div><script>\n\t\t\tfunction newDeckForm() {\n\t\t\t\treturn {\n\t\t\t\t\tcards: [{ front: \"\", back: \"\" }],\n\t\t\t\t\taddCard() {\n\t\t\t\t\t\tthis.cards.push({ front: \"\", back: \"\" });\n\t\t\t\t\t},\n\t\t\t\t\tremoveCard(i) {\n\t\t\t\t\t\tthis.cards.splice(i, 1);\n\t\t\t\t\t\tif (this.cards.length === 0) this.addCard();\n\t\t\t\t\t},\n\t\t\t\t};\n\t\t\t}\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = Base("memri — New deck", isAuthed, unread).Render(templ.WithChildren(ctx, templ_7745c5c3_Var10), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Base("memri — New deck", isAuthed, unread).Render(templ.WithChildren(ctx, templ_7745c5c3_Var11), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -271,12 +284,12 @@ func DeckSearchHint() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var11 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var11 == nil {
-			templ_7745c5c3_Var11 = templ.NopComponent
+		templ_7745c5c3_Var12 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var12 == nil {
+			templ_7745c5c3_Var12 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<p class=\"mt-4 text-center text-sm text-base-content/60\">Type to search your decks.</p>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<p class=\"mt-4 text-center text-sm text-base-content/75\">Type to search your decks.</p>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -300,86 +313,86 @@ func DeckSearchResults(decks []DeckSearchResult) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var12 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var12 == nil {
-			templ_7745c5c3_Var12 = templ.NopComponent
+		templ_7745c5c3_Var13 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var13 == nil {
+			templ_7745c5c3_Var13 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		if len(decks) == 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div role=\"alert\" class=\"alert mt-4\"><span class=\"text-sm\">No decks found.</span></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<div role=\"alert\" class=\"alert mt-4\"><span class=\"text-sm\">No decks found.</span></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
 			for _, d := range decks {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var13 templ.SafeURL
-				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/decks/%d", d.ID)))
+				var templ_7745c5c3_Var14 templ.SafeURL
+				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/decks/%d", d.ID)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/decks.templ`, Line: 162, Col: 58}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" class=\"card bg-base-200 block p-4 shadow-sm transition hover:bg-base-300\"><span class=\"font-semibold\">")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var14 string
-				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(d.Title)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/decks.templ`, Line: 163, Col: 41}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/decks.templ`, Line: 168, Col: 58}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</span> <span class=\"mt-1 block text-sm text-base-content/70\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" class=\"card bg-base-200 block p-4 shadow-sm transition hover:bg-base-300\"><span class=\"font-semibold\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var15 string
-				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(d.Description)
+				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(d.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/decks.templ`, Line: 164, Col: 73}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/decks.templ`, Line: 169, Col: 41}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</span> <span class=\"mt-2 block font-mono text-xs text-base-content/60\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</span> <span class=\"mt-1 block text-sm text-base-content/80\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var16 string
-				templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", d.CardCount))
+				templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(d.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/decks.templ`, Line: 166, Col: 37}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/decks.templ`, Line: 170, Col: 73}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, " ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</span> <span class=\"mt-2 block font-mono text-xs text-base-content/75\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var17 string
+				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", d.CardCount))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/decks.templ`, Line: 172, Col: 37}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, " ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				if d.CardCount == 1 {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "card")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "card")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				} else {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "cards")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "cards")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</span></a>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</span></a>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -405,12 +418,12 @@ func FlashPage(isAuthed bool, unread int64) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var17 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var17 == nil {
-			templ_7745c5c3_Var17 = templ.NopComponent
+		templ_7745c5c3_Var18 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var18 == nil {
+			templ_7745c5c3_Var18 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var18 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var19 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -422,13 +435,13 @@ func FlashPage(isAuthed bool, unread int64) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<div class=\"mx-auto max-w-2xl\"><div id=\"card-container\" hx-post=\"/api/decks\" hx-trigger=\"load\" hx-target=\"this\" hx-swap=\"innerHTML\" hx-vals=\"js:{ deck_id: window.location.pathname.split('/').filter(Boolean).pop() }\"><div class=\"flex h-80 flex-col items-center justify-center gap-4\"><span class=\"loading loading-spinner loading-lg\"></span> <span class=\"text-sm text-base-content/60\">Loading card...</span></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<div class=\"mx-auto max-w-2xl\"><div id=\"card-container\" hx-post=\"/api/decks\" hx-trigger=\"load\" hx-target=\"this\" hx-swap=\"innerHTML\" hx-vals=\"js:{ deck_id: window.location.pathname.split('/').filter(Boolean).pop() }\"><div class=\"flex h-80 flex-col items-center justify-center gap-4\"><span class=\"loading loading-spinner loading-lg\"></span> <span class=\"text-sm text-base-content/75\">Loading card...</span></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = Base("memri — Deck", isAuthed, unread).Render(templ.WithChildren(ctx, templ_7745c5c3_Var18), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Base("memri — Deck", isAuthed, unread).Render(templ.WithChildren(ctx, templ_7745c5c3_Var19), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

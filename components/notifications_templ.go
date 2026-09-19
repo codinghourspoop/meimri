@@ -56,7 +56,7 @@ func NotificationsPage(items []NotificationItem, unread int64) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				for _, n := range items {
-					var templ_7745c5c3_Var3 = []any{"card card-border p-3 text-sm", templ.KV("bg-base-100", n.IsRead == 0), templ.KV("bg-base-200 opacity-60", n.IsRead != 0)}
+					var templ_7745c5c3_Var3 = []any{"card card-border p-3 text-sm", templ.KV("bg-base-100", n.IsRead == 0), templ.KV("bg-base-200 opacity-75", n.IsRead != 0)}
 					templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var3...)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err

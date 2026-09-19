@@ -6,12 +6,18 @@ import (
 	"gitlab.com/coding4hours/memri/icons"
 )
 
-templ CardFragment(title, description string, cards []CardInput) {
+templ CardFragment(deckID int64, title, description string, cards []CardInput) {
 	<div class="mb-8 text-center">
 		<h1 class="text-3xl font-bold tracking-tight">{ title }</h1>
-		<p class="mt-2 text-base-content/70">
+		<p class="mt-2 text-base-content/80">
 			{ description }
 		</p>
+		<div class="mt-4 flex items-center justify-center">
+			<div class="inline-flex items-center rounded-full border border-base-300 bg-base-200 p-1">
+				<span class="btn btn-sm btn-primary rounded-full px-4">Flashcards</span>
+				<a href={ templ.SafeURL(fmt.Sprintf("/decks/%d/learn", deckID)) } class="btn btn-sm btn-ghost rounded-full px-4">Learn</a>
+			</div>
+		</div>
 	</div>
 	<div
 		x-data={ fmt.Sprintf("flashcards(%d)", len(cards)) }
@@ -42,7 +48,7 @@ templ CardFragment(title, description string, cards []CardInput) {
 				</div>
 			}
 		</div>
-		<p class="mt-4 text-center text-sm text-base-content/60">
+		<p class="mt-4 text-center text-sm text-base-content/75">
 			Click the card or press <span class="kbd kbd-xs">space</span> to flip it · <span class="kbd kbd-xs">←</span> <span class="kbd kbd-xs">→</span> to navigate
 		</p>
 		<div class="card bg-base-200 mt-2 shadow-sm">
@@ -149,7 +155,7 @@ templ NewDeckPage(isAuthed bool, unread int64) {
 }
 
 templ DeckSearchHint() {
-	<p class="mt-4 text-center text-sm text-base-content/60">Type to search your decks.</p>
+	<p class="mt-4 text-center text-sm text-base-content/75">Type to search your decks.</p>
 }
 
 templ DeckSearchResults(decks []DeckSearchResult) {
@@ -161,8 +167,8 @@ templ DeckSearchResults(decks []DeckSearchResult) {
 		for _, d := range decks {
 			<a href={ templ.SafeURL(fmt.Sprintf("/decks/%d", d.ID)) } class="card bg-base-200 block p-4 shadow-sm transition hover:bg-base-300">
 				<span class="font-semibold">{ d.Title }</span>
-				<span class="mt-1 block text-sm text-base-content/70">{ d.Description }</span>
-				<span class="mt-2 block font-mono text-xs text-base-content/60">
+				<span class="mt-1 block text-sm text-base-content/80">{ d.Description }</span>
+				<span class="mt-2 block font-mono text-xs text-base-content/75">
 					{ fmt.Sprintf("%d", d.CardCount) }
 					if d.CardCount == 1 {
 						card
@@ -188,7 +194,7 @@ templ FlashPage(isAuthed bool, unread int64) {
 			>
 				<div class="flex h-80 flex-col items-center justify-center gap-4">
 					<span class="loading loading-spinner loading-lg"></span>
-					<span class="text-sm text-base-content/60">Loading card...</span>
+					<span class="text-sm text-base-content/75">Loading card...</span>
 				</div>
 			</div>
 		</div>

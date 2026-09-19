@@ -68,7 +68,7 @@ func HomePage(isAuthed bool, unread int64, username, displayName string) templ.C
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, ")</h1><p class=\"mt-2 text-base-content/70\">Welcome back to memri.</p></div></div></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, ")</h1><p class=\"mt-2 text-base-content/80\">Welcome back to memri.</p></div></div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -77,7 +77,7 @@ func HomePage(isAuthed bool, unread int64, username, displayName string) templ.C
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"hero\"><div class=\"hero-content text-center\"><div class=\"max-w-2xl\"><h1 class=\"text-4xl font-bold tracking-tight\">Welcome to memri</h1><p class=\"mt-4 text-base-content/70\">Server-rendered Go + Templ + htmx. No SPA, no JWT, no email.</p><div class=\"mt-8 flex justify-center gap-4\"><div class=\"aura\"><a href=\"/register\" class=\"btn\">Get started</a></div><div class=\"aura\"><a href=\"/login\" class=\"btn\">Login</a></div></div></div></div></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"hero\"><div class=\"hero-content text-center\"><div class=\"max-w-2xl\"><h1 class=\"text-4xl font-bold tracking-tight\">Welcome to memri</h1><p class=\"mt-4 text-base-content/80\">Server-rendered Go + Templ + htmx. No SPA, no JWT, no email.</p><div class=\"mt-8 flex justify-center gap-4\"><div class=\"aura\"><a href=\"/register\" class=\"btn\">Get started</a></div><div class=\"aura\"><a href=\"/login\" class=\"btn\">Login</a></div></div></div></div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

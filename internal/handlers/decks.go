@@ -305,6 +305,11 @@ func (a *App) ReadDeck(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
+	if len(decks) == 0 {
+		http.Error(w, "deck not found", http.StatusNotFound)
+		return
+	}
+
 	if len(decks[0].Cards) == 0 {
 		http.Error(w, "deck has no cards", http.StatusNotFound)
 		return
@@ -314,6 +319,7 @@ func (a *App) ReadDeck(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	if err := components.CardFragment(
+		decks[0].ID,
 		decks[0].Title,
 		decks[0].Description,
 		decks[0].Cards,

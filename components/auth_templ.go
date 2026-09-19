@@ -201,7 +201,7 @@ func RecoveryCodesPage(codes []string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"mx-auto max-w-lg\"><div class=\"card bg-base-200 shadow-sm\"><div class=\"card-body\"><h1 class=\"card-title text-2xl\">Save your recovery codes</h1><p class=\"text-sm text-base-content/70\">Store these somewhere safe. Each code can be used once to reset your password. This is the only time they will be shown.</p><ul class=\"menu bg-base-100 mt-4 gap-1 rounded-box font-mono text-sm\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"mx-auto max-w-lg\"><div class=\"card bg-base-200 shadow-sm\"><div class=\"card-body\"><h1 class=\"card-title text-2xl\">Save your recovery codes</h1><p class=\"text-sm text-base-content/80\">Store these somewhere safe. Each code can be used once to reset your password. This is the only time they will be shown.</p><ul class=\"menu bg-base-100 mt-4 gap-1 rounded-box font-mono text-sm\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -46,7 +46,10 @@ func main() {
 	r.Post("/register", app.DoRegister)
 
 	r.Get("/decks/new", app.NewDeck)
-	r.Get("/decks/*", app.Bob)
+	r.Get("/decks/{id}/learn", app.LearnView)
+	r.Get("/decks/{id}", app.Bob)
+	r.Get("/api/learn", app.ReadLearn)
+	r.Post("/api/learn", app.ReadLearn)
 	r.Post("/api/decks", app.ReadDeck)
 	r.Post("/api/decks/search", app.SearchDecks)
 	r.Post("/api/decks/create", app.CreateDeck)
