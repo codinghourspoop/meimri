@@ -1,0 +1,196 @@
+package components
+
+import (
+	"fmt"
+
+	"gitlab.com/coding4hours/memri/icons"
+)
+
+templ CardFragment(title, description string, cards []CardInput) {
+	<div class="mb-8 text-center">
+		<h1 class="text-3xl font-bold tracking-tight">{ title }</h1>
+		<p class="mt-2 text-base-content/70">
+			{ description }
+		</p>
+	</div>
+	<div
+		x-data={ fmt.Sprintf("flashcards(%d)", len(cards)) }
+		x-on:keydown.window="onKey($event)"
+		class="mx-auto w-full max-w-md"
+	>
+		<div class="[perspective:1000px]">
+			for index, item := range cards {
+				<div x-show={ fmt.Sprintf("currentCard === %d", index) }>
+					<button
+						type="button"
+						x-on:click="flip()"
+						x-bind:aria-label="flipped ? 'Show question' : 'Show answer'"
+						class="relative h-80 w-full text-left transition-transform duration-300 [transform-style:preserve-3d]"
+						x-bind:class="flipped ? '[transform:rotateX(180deg)]' : '[transform:rotateX(0deg)]'"
+					>
+						<div class="card bg-base-100 border-base-300 absolute inset-0 flex items-center justify-center border p-8 text-center shadow-xl [backface-visibility:hidden]">
+							<p class="text-xl font-medium">
+								{ item.Front }
+							</p>
+						</div>
+						<div class="card bg-primary/10 border-primary/20 absolute inset-0 flex items-center justify-center border p-8 text-center shadow-xl [backface-visibility:hidden] [transform:rotateX(180deg)]">
+							<p class="text-lg">
+								{ item.Back }
+							</p>
+						</div>
+					</button>
+				</div>
+			}
+		</div>
+		<p class="mt-4 text-center text-sm text-base-content/60">
+			Click the card or press <span class="kbd kbd-xs">space</span> to flip it · <span class="kbd kbd-xs">←</span> <span class="kbd kbd-xs">→</span> to navigate
+		</p>
+		<div class="card bg-base-200 mt-2 shadow-sm">
+			<div class="card-body flex-row items-center justify-between p-2">
+				<button
+					type="button"
+					x-on:click="prev()"
+					x-bind:disabled="currentCard === 0"
+					class="btn btn-ghost"
+					aria-label="Previous card"
+				>
+					@icons.Icon("arrow-left", "size-5")
+				</button>
+				<span class="font-mono text-sm" x-text="`${currentCard + 1}/${total}`"></span>
+				<button
+					type="button"
+					x-on:click="next()"
+					x-bind:disabled="currentCard === total - 1"
+					class="btn btn-ghost"
+					aria-label="Next card"
+				>
+					@icons.Icon("arrow-right", "size-5")
+				</button>
+			</div>
+		</div>
+	</div>
+}
+
+templ DeckSearch() {
+	<section class="mx-auto mt-8 max-w-2xl">
+		<label class="input w-full">
+			@icons.Icon("search", "size-5")
+			<input
+				name="q"
+				placeholder="Search decks..."
+				autocomplete="off"
+				class="w-full"
+				hx-post="/api/decks/search"
+				hx-trigger="input changed delay:250ms"
+				hx-target="#deck-search-results"
+				hx-swap="innerHTML"
+			/>
+		</label>
+		<div id="deck-search-results" class="mt-4 space-y-2" aria-live="polite">
+			@DeckSearchHint()
+		</div>
+	</section>
+}
+
+templ NewDeckPage(isAuthed bool, unread int64) {
+	@Base("memri — New deck", isAuthed, unread) {
+		<div class="mx-auto max-w-2xl" x-data="newDeckForm()">
+			<h1 class="text-2xl font-bold">New deck</h1>
+			<form hx-post="/api/decks/create" hx-swap="none" class="mt-6 space-y-4">
+				<fieldset class="fieldset">
+					<legend class="fieldset-legend">Title</legend>
+					<input name="title" required class="input w-full" placeholder="Deck title"/>
+				</fieldset>
+				<fieldset class="fieldset">
+					<legend class="fieldset-legend">Description</legend>
+					<input name="description" class="input w-full" placeholder="What is this deck about?"/>
+				</fieldset>
+				<div class="space-y-2">
+					<span class="fieldset-legend">Cards</span>
+					<template x-for="(card, i) in cards" x-bind:key="i">
+						<div class="flex gap-2">
+							<input name="front" x-model="card.front" class="input w-full" placeholder="Front"/>
+							<input name="back" x-model="card.back" class="input w-full" placeholder="Back"/>
+							<button
+								type="button"
+								class="btn btn-ghost btn-square shrink-0"
+								aria-label="Remove card"
+								x-on:click="removeCard(i)"
+							>
+								@icons.Icon("x", "size-5")
+							</button>
+						</div>
+					</template>
+					<div class="aura">
+					    <button type="button" class="btn btn-sm" x-on:click="addCard()">
+						    @icons.Icon("plus", "size-4")
+						    Add card
+					    </button>
+					</div>
+				</div>
+				<button type="submit" class="btn btn-primary">Create deck</button>
+			</form>
+		</div>
+		<script>
+			function newDeckForm() {
+				return {
+					cards: [{ front: "", back: "" }],
+					addCard() {
+						this.cards.push({ front: "", back: "" });
+					},
+					removeCard(i) {
+						this.cards.splice(i, 1);
+						if (this.cards.length === 0) this.addCard();
+					},
+				};
+			}
+		</script>
+	}
+}
+
+templ DeckSearchHint() {
+	<p class="mt-4 text-center text-sm text-base-content/60">Type to search your decks.</p>
+}
+
+templ DeckSearchResults(decks []DeckSearchResult) {
+	if len(decks) == 0 {
+		<div role="alert" class="alert mt-4">
+			<span class="text-sm">No decks found.</span>
+		</div>
+	} else {
+		for _, d := range decks {
+			<a href={ templ.SafeURL(fmt.Sprintf("/decks/%d", d.ID)) } class="card bg-base-200 block p-4 shadow-sm transition hover:bg-base-300">
+				<span class="font-semibold">{ d.Title }</span>
+				<span class="mt-1 block text-sm text-base-content/70">{ d.Description }</span>
+				<span class="mt-2 block font-mono text-xs text-base-content/60">
+					{ fmt.Sprintf("%d", d.CardCount) }
+					if d.CardCount == 1 {
+						card
+					} else {
+						cards
+					}
+				</span>
+			</a>
+		}
+	}
+}
+
+templ FlashPage(isAuthed bool, unread int64) {
+	@Base("memri — Deck", isAuthed, unread) {
+		<div class="mx-auto max-w-2xl">
+			<div
+				id="card-container"
+				hx-post="/api/decks"
+				hx-trigger="load"
+				hx-target="this"
+				hx-swap="innerHTML"
+				hx-vals="js:{ deck_id: window.location.pathname.split('/').filter(Boolean).pop() }"
+			>
+				<div class="flex h-80 flex-col items-center justify-center gap-4">
+					<span class="loading loading-spinner loading-lg"></span>
+					<span class="text-sm text-base-content/60">Loading card...</span>
+				</div>
+			</div>
+		</div>
+	}
+}

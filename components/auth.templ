@@ -1,0 +1,111 @@
+package components
+
+import (
+	"gitlab.com/coding4hours/memri/icons"
+)
+
+templ LoginPage(errMsg string) {
+	@Base("Login", false, 0) {
+		<div class="mx-auto max-w-sm">
+			<h1 class="text-2xl font-bold">Login</h1>
+			if errMsg != "" {
+				<div role="alert" class="alert alert-error mt-3">
+					<span>{ errMsg }</span>
+				</div>
+			}
+			<form method="POST" action="/login" class="mt-6 space-y-4">
+				<label class="input w-full">
+					@icons.Icon("user", "size-5")
+					<input name="username" required placeholder="Username" class="w-full"/>
+				</label>
+				<label class="input w-full">
+					@icons.Icon("lock", "size-5")
+					<input name="password" placeholder="Password" type="password" required class="w-full"/>
+				</label>
+				<div class="flex w-full justify-center">
+					<button type="submit" class="btn btn-primary btn-wide">Login</button>
+				</div>
+			</form>
+			<p class="mt-4 text-center text-sm">
+				<a href="/recover" class="link">Recover with code</a> · <a href="/register" class="link">Register</a>
+			</p>
+		</div>
+	}
+}
+
+templ RegisterPage(errMsg string) {
+	@Base("Register", false, 0) {
+		<div class="mx-auto max-w-sm">
+			<h1 class="text-2xl font-bold">Create account</h1>
+			if errMsg != "" {
+				<div role="alert" class="alert alert-error mt-3">
+					<span>{ errMsg }</span>
+				</div>
+			}
+			<form method="POST" action="/register" class="mt-6 space-y-4">
+				<fieldset class="fieldset">
+					<legend class="fieldset-legend">Username (3-32 chars, letters/numbers/_/-)</legend>
+					<input name="username" required pattern="[a-zA-Z0-9_-]{3,32}" class="input w-full" placeholder="Username"/>
+				</fieldset>
+				<fieldset class="fieldset">
+					<legend class="fieldset-legend">Display name</legend>
+					<input name="display_name" required class="input w-full" placeholder="Display name"/>
+				</fieldset>
+				<fieldset class="fieldset">
+					<legend class="fieldset-legend">Password (min 8 chars)</legend>
+					<input name="password" type="password" required minlength="8" class="input w-full" placeholder="Password"/>
+				</fieldset>
+				<button type="submit" class="btn btn-primary w-full">Create account</button>
+			</form>
+		</div>
+	}
+}
+
+templ RecoveryCodesPage(codes []string) {
+	@Base("Recovery codes", true, 0) {
+		<div class="mx-auto max-w-lg">
+			<div class="card bg-base-200 shadow-sm">
+				<div class="card-body">
+					<h1 class="card-title text-2xl">Save your recovery codes</h1>
+					<p class="text-sm text-base-content/70">Store these somewhere safe. Each code can be used once to reset your password. This is the only time they will be shown.</p>
+					<ul class="menu bg-base-100 mt-4 gap-1 rounded-box font-mono text-sm">
+						for _, c := range codes {
+							<li><span class="kbd kbd-sm w-full justify-start">{ c }</span></li>
+						}
+					</ul>
+					<div class="card-actions mt-4">
+						<a href="/" class="btn btn-primary">Continue to home</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+templ RecoverPage(errMsg string) {
+	@Base("Recover account", false, 0) {
+		<div class="mx-auto max-w-sm">
+			<h1 class="text-2xl font-bold">Recover account</h1>
+			if errMsg != "" {
+				<div role="alert" class="alert alert-error mt-3">
+					<span>{ errMsg }</span>
+				</div>
+			}
+			<form method="POST" action="/recover" class="mt-6 space-y-4">
+				<fieldset class="fieldset">
+					<legend class="fieldset-legend">Username</legend>
+					<input name="username" required class="input w-full" placeholder="Username"/>
+				</fieldset>
+				<fieldset class="fieldset">
+					<legend class="fieldset-legend">Recovery code</legend>
+					<input name="code" required class="input w-full font-mono" placeholder="Recovery code"/>
+				</fieldset>
+				<fieldset class="fieldset">
+					<legend class="fieldset-legend">New password</legend>
+					<input name="password" type="password" required minlength="8" class="input w-full" placeholder="New password"/>
+				</fieldset>
+				<button type="submit" class="btn btn-primary w-full">Reset password</button>
+			</form>
+		</div>
+	}
+}

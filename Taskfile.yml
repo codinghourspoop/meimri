@@ -1,0 +1,37 @@
+version: "3"
+
+tasks:
+  dev:
+    desc: Run templ, tailwind, and air in parallel
+    cmds:
+      - templ generate --watch --proxy="http://localhost:8080" --open-browser=false &
+      - tailwindcss -i ./assets/css/input.css -o ./static/css/app.css --watch &
+      - air
+    deps: [tailwind:download]
+
+  build:
+    desc: Production build
+    cmds:
+      - templ generate
+      - tailwindcss -i ./assets/css/input.css -o ./static/css/app.css --minify
+      - go build -o ./tmp/main ./cmd/server
+
+  generate:
+    desc: Generate templ
+    cmds:
+      - templ generate
+
+  migrate:
+    desc: Run goose migrations (sqlite3 dialect — Turso is SQLite-compatible)
+    cmds:
+      - goose -dir db/migrations sqlite3 "${DATABASE_URL:-./data/app.db}" up
+
+  migrate:down:
+    cmds:
+      - goose -dir db/migrations sqlite3 "${DATABASE_URL:-./data/app.db}" down
+
+  tailwind:download:
+    internal: true
+    cmds:
+      - mkdir -p static/css
+      - touch static/css/app.css

@@ -1,0 +1,74 @@
+
+package components
+
+import "gitlab.com/coding4hours/memri/icons"
+
+templ Base(title string, isAuthed bool, unreadCount int64) {
+	<!DOCTYPE html>
+	<html lang="en" data-theme="dark">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>{ title }</title>
+			<link rel="stylesheet" href="/static/css/app.css"/>
+			<script src="/static/js/htmx.min.js" defer></script>
+			<script src="/static/js/flashcards.js" defer></script>
+			<script src="https://unpkg.com/alpinejs" defer></script>
+			<script src="https://cdn.jsdelivr.net/npm/htmx.org@4.0.0/dist/ext/hx-alpine-compat.js"></script>
+			<link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css"/>
+		</head>
+		<body class="min-h-screen bg-base-100 text-base-content antialiased">
+			<nav class="navbar bg-base-200 shadow-sm">
+				<div class="navbar-start">
+					<a href="/" class="btn btn-ghost text-xl">Memri</a>
+				</div>
+				<div class="navbar-end">
+					if isAuthed {
+						<a href="/decks/new" class="btn btn-ghost btn-circle" aria-label="New deck" title="New deck">
+							@icons.Icon("plus", "size-5")
+						</a>
+						<button class="btn btn-ghost btn-circle">
+							@NotificationBell(unreadCount)
+						</button>
+						<form method="POST" action="/logout">
+							<button class="btn btn-ghost btn-circle" aria-label="Logout">
+								@icons.Icon("log-out", "size-5")
+							</button>
+						</form>
+					}
+				</div>
+			</nav>
+			<main class="mx-auto max-w-5xl px-4 py-8">
+				{ children... }
+			</main>
+		</body>
+	</html>
+}
+
+templ NotificationBell(count int64) {
+	<a href="/notifications" class="flex items-center justify-center" aria-label="Notifications">
+		<div class="indicator">
+			@icons.Icon("bell", "size-5")
+			<span class="badge badge-xs badge-primary indicator-item">{ intToString(count) }</span>
+		</div>
+	</a>
+}
+
+func intToString(n int64) string {
+	if n == 0 {
+		return "0"
+	}
+	neg := n < 0
+	if neg {
+		n = -n
+	}
+	buf := make([]byte, 0, 20)
+	for n > 0 {
+		buf = append([]byte{byte('0' + n%10)}, buf...)
+		n /= 10
+	}
+	if neg {
+		buf = append([]byte{'-'}, buf...)
+	}
+	return string(buf)
+}
