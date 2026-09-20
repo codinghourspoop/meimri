@@ -3,42 +3,44 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
-	"gitlab.com/coding4hours/memri/components"
+	"github.com/go-chi/chi/v5"
 	"gitlab.com/coding4hours/memri/internal/auth"
 )
 
-type createDeckRequests struct {
-	Title       string                 `json:"title"`
-	Description string                 `json:"description"`
-	Cards       []components.CardInput `json:"cards"`
+type createDeckRequest struct {
+	Title       string      `json:"title"`
+	Description string      `json:"description"`
+	Cards       []CardInput `json:"cards"`
 }
 
-type deckResponse struct {
-	ID          int64                  `json:"id"`
-	Title       string                 `json:"title"`
-	Description string                 `json:"description"`
-	Cards       []components.CardInput `json:"cards"`
+type deckJSON struct {
+	ID          int64       `json:"id"`
+	Title       string      `json:"title"`
+	Description string      `json:"description"`
+	Cards       []CardInput `json:"cards"`
 }
 
+type deckSearchJSON struct {
+	ID          int64  `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	CardCount   int    `json:"card_count"`
+}
+
+// GET /api/decks/search?q= — empty query lists the user's decks, newest first.
 func (a *App) SearchDecks(w http.ResponseWriter, r *http.Request) {
 	userID := auth.UserID(r)
 	if userID == 0 {
-		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		writeError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
 
-	q := strings.TrimSpace(r.FormValue("q"))
-	if q == "" {
-		q = strings.TrimSpace(r.FormValue("query"))
-	}
-	if q == "" {
-		q = strings.TrimSpace(r.FormValue("search"))
-	}
+	q := strings.TrimSpace(r.URL.Query().Get("q"))
 
 	var (
 		rows *sql.Rows
@@ -46,7 +48,6 @@ func (a *App) SearchDecks(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if q == "" {
-		// No query: list the user's decks, newest first.
 		rows, err = a.DB.QueryContext(
 			r.Context(),
 			`SELECT id, title, description, cards
@@ -73,75 +74,42 @@ func (a *App) SearchDecks(w http.ResponseWriter, r *http.Request) {
 	}
 	if err != nil {
 		log.Printf("SearchDecks database error: %v", err)
-		http.Error(w, "failed to search decks", http.StatusInternalServerError)
+		writeError(w, http.StatusInternalServerError, "failed to search decks")
 		return
 	}
 	defer rows.Close()
 
-	decks := make([]deckResponse, 0)
-
+	results := make([]deckSearchJSON, 0)
 	for rows.Next() {
-		var deck deckResponse
+		var id int64
+		var title, description string
 		var cardsJSON []byte
-
-		if err := rows.Scan(
-			&deck.ID,
-			&deck.Title,
-			&deck.Description,
-			&cardsJSON,
-		); err != nil {
+		if err := rows.Scan(&id, &title, &description, &cardsJSON); err != nil {
 			log.Printf("SearchDecks scan error: %v", err)
-			http.Error(w, "failed to scan deck", http.StatusInternalServerError)
+			writeError(w, http.StatusInternalServerError, "failed to scan deck")
 			return
 		}
-
+		var cards []CardInput
 		if len(cardsJSON) > 0 {
-			if err := json.Unmarshal(cardsJSON, &deck.Cards); err != nil {
+			if err := json.Unmarshal(cardsJSON, &cards); err != nil {
 				log.Printf("SearchDecks decode cards error: %v", err)
-				http.Error(w, "failed to decode cards", http.StatusInternalServerError)
+				writeError(w, http.StatusInternalServerError, "failed to decode cards")
 				return
 			}
 		}
-		if deck.Cards == nil {
-			deck.Cards = []components.CardInput{}
-		}
-
-		decks = append(decks, deck)
+		results = append(results, deckSearchJSON{
+			ID:          id,
+			Title:       title,
+			Description: description,
+			CardCount:   len(cards),
+		})
 	}
-
 	if err := rows.Err(); err != nil {
 		log.Printf("SearchDecks rows error: %v", err)
-		http.Error(w, "failed to read decks", http.StatusInternalServerError)
+		writeError(w, http.StatusInternalServerError, "failed to read decks")
 		return
 	}
-
-	if isHX(r) {
-		// htmx search box: empty query restores the hint, no DB dump.
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		if q == "" {
-			_ = components.DeckSearchHint().Render(r.Context(), w)
-			return
-		}
-		results := make([]components.DeckSearchResult, 0, len(decks))
-		for _, d := range decks {
-			results = append(results, components.DeckSearchResult{
-				ID:          d.ID,
-				Title:       d.Title,
-				Description: d.Description,
-				CardCount:   len(d.Cards),
-			})
-		}
-		if err := components.DeckSearchResults(results).Render(r.Context(), w); err != nil {
-			log.Printf("SearchDecks render error: %v", err)
-		}
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(decks); err != nil {
-		log.Printf("SearchDecks encode error: %v", err)
-	}
+	writeJSON(w, http.StatusOK, results)
 }
 
 // escapeLike escapes \, % and _ so user input is treated literally in LIKE.
@@ -152,179 +120,108 @@ func escapeLike(s string) string {
 	return s
 }
 
-func (a *App) NewDeck(w http.ResponseWriter, r *http.Request) {
-	uid, _, _, unread := a.currentUser(r)
-	if uid == 0 {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-	_ = components.NewDeckPage(true, unread).Render(r.Context(), w)
-}
-
+// POST /api/decks — JSON body {title, description, cards}.
 func (a *App) CreateDeck(w http.ResponseWriter, r *http.Request) {
 	userID := auth.UserID(r)
 	if userID == 0 {
-		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		writeError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
 
-	var input createDeckRequests
-
-	if strings.HasPrefix(r.Header.Get("Content-Type"), "application/json") {
-		if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-			http.Error(w, "invalid JSON", http.StatusBadRequest)
-			return
-		}
-	} else {
-		// htmx form post from NewDeckPage: repeated front/back pairs.
-		if err := r.ParseForm(); err != nil {
-			http.Error(w, "invalid form", http.StatusBadRequest)
-			return
-		}
-		input.Title = strings.TrimSpace(r.FormValue("title"))
-		input.Description = strings.TrimSpace(r.FormValue("description"))
-		fronts := r.Form["front"]
-		backs := r.Form["back"]
-		n := len(fronts)
-		if len(backs) > n {
-			n = len(backs)
-		}
-		for i := 0; i < n; i++ {
-			var front, back string
-			if i < len(fronts) {
-				front = strings.TrimSpace(fronts[i])
-			}
-			if i < len(backs) {
-				back = strings.TrimSpace(backs[i])
-			}
-			if front == "" && back == "" {
-				continue
-			}
-			input.Cards = append(input.Cards, components.CardInput{Front: front, Back: back})
-		}
+	var input createDeckRequest
+	if err := decodeJSON(r, &input); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid JSON")
+		return
 	}
+	input.Title = strings.TrimSpace(input.Title)
+	input.Description = strings.TrimSpace(input.Description)
+	clean := make([]CardInput, 0, len(input.Cards))
+	for _, c := range input.Cards {
+		c.Front = strings.TrimSpace(c.Front)
+		c.Back = strings.TrimSpace(c.Back)
+		if c.Front == "" && c.Back == "" {
+			continue
+		}
+		clean = append(clean, c)
+	}
+	input.Cards = clean
 
 	if input.Title == "" {
-		http.Error(w, "title is required", http.StatusBadRequest)
+		writeError(w, http.StatusBadRequest, "title is required")
 		return
 	}
 
 	cardsJSON, err := json.Marshal(input.Cards)
 	if err != nil {
-		http.Error(w, "failed to encode cards", http.StatusInternalServerError)
+		writeError(w, http.StatusInternalServerError, "failed to encode cards")
 		return
 	}
 
 	result, err := a.DB.ExecContext(
 		r.Context(),
 		`INSERT INTO deck (user_id, title, description, cards)
-		 VALUES (?, ?, ?,?)`,
+		 VALUES (?, ?, ?, ?)`,
 		userID,
 		input.Title,
 		input.Description,
 		string(cardsJSON),
 	)
 	if err != nil {
-		http.Error(w, "failed to create deck", http.StatusInternalServerError)
+		writeError(w, http.StatusInternalServerError, "failed to create deck")
 		return
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		http.Error(w, "failed to get deck ID", http.StatusInternalServerError)
+		writeError(w, http.StatusInternalServerError, "failed to get deck ID")
 		return
 	}
 
-	response := deckResponse{
+	writeJSON(w, http.StatusCreated, deckJSON{
 		ID:          id,
 		Title:       input.Title,
 		Description: input.Description,
 		Cards:       input.Cards,
-	}
-
-	if isHX(r) {
-		// htmx form submit: navigate to the new deck.
-		w.Header().Set("HX-Redirect", fmt.Sprintf("/decks/%d", id))
-		w.WriteHeader(http.StatusCreated)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		return
-	}
+	})
 }
 
+// GET /api/decks/{id}
 func (a *App) ReadDeck(w http.ResponseWriter, r *http.Request) {
-	rows, err := a.DB.QueryContext(
+	userID := auth.UserID(r)
+	if userID == 0 {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	deckID, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil || deckID <= 0 {
+		writeError(w, http.StatusBadRequest, "invalid deck id")
+		return
+	}
+
+	var deck deckJSON
+	var cardsJSON []byte
+	err = a.DB.QueryRowContext(
 		r.Context(),
-		`SELECT id, title, description, cards
-		 FROM deck
-		 WHERE id =?`,
-		r.FormValue("deck_id"),
-	)
+		`SELECT id, title, description, cards FROM deck WHERE id = ? AND user_id = ?`,
+		deckID, userID,
+	).Scan(&deck.ID, &deck.Title, &deck.Description, &cardsJSON)
+	if err == sql.ErrNoRows {
+		writeError(w, http.StatusNotFound, "deck not found")
+		return
+	}
 	if err != nil {
 		log.Printf("ReadDeck database error: %v", err)
-		http.Error(w, "failed to read deck", http.StatusInternalServerError)
+		writeError(w, http.StatusInternalServerError, "failed to read deck")
 		return
 	}
-	defer rows.Close()
-
-	var decks []deckResponse
-
-	for rows.Next() {
-		var deck deckResponse
-		var cardsJSON []byte
-
-		if err := rows.Scan(
-			&deck.ID,
-			&deck.Title,
-			&deck.Description,
-			&cardsJSON,
-		); err != nil {
-			http.Error(w, "failed to scan deck", http.StatusInternalServerError)
+	if len(cardsJSON) > 0 {
+		if err := json.Unmarshal(cardsJSON, &deck.Cards); err != nil {
+			writeError(w, http.StatusInternalServerError, "failed to decode cards")
 			return
 		}
-
-		if len(cardsJSON) > 0 {
-			if err := json.Unmarshal(cardsJSON, &deck.Cards); err != nil {
-				http.Error(w, "failed to decode cards", http.StatusInternalServerError)
-				return
-			}
-		}
-
-		decks = append(decks, deck)
 	}
-
-	if err := rows.Err(); err != nil {
-		http.Error(w, "failed to read decks", http.StatusInternalServerError)
-		return
+	if deck.Cards == nil {
+		deck.Cards = []CardInput{}
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-
-	if len(decks) == 0 {
-		http.Error(w, "deck not found", http.StatusNotFound)
-		return
-	}
-
-	if len(decks[0].Cards) == 0 {
-		http.Error(w, "deck has no cards", http.StatusNotFound)
-		return
-	}
-
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-
-	if err := components.CardFragment(
-		decks[0].ID,
-		decks[0].Title,
-		decks[0].Description,
-		decks[0].Cards,
-	).Render(r.Context(), w); err != nil {
-		log.Printf("render card: %v", err)
-	}
-
+	writeJSON(w, http.StatusOK, deck)
 }

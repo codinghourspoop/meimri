@@ -1,8 +1,0 @@
-@import "tailwindcss";
-
-/* Legibility: lift daisyUI's dim input placeholders (higher specificity
-   than the CDN defaults so this wins regardless of stylesheet order). */
-input.input::placeholder,
-textarea.textarea::placeholder {
-  color: color-mix(in oklab, var(--color-base-content) 72%, transparent);
-}

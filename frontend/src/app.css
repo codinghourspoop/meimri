@@ -1,0 +1,23 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+/* Restore the pre-rewrite body typeface: daisyUI ≥5.7 overrides
+   --font-sans with an Apple/Windows-centric stack, which falls back
+   to DejaVu Sans on Linux. The old app rendered ui-sans-serif/system-ui. */
+@theme {
+  --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+/* Legibility: lift daisyUI's dim input placeholders. */
+input.input::placeholder,
+textarea.textarea::placeholder {
+  color: color-mix(in oklab, var(--color-base-content) 72%, transparent);
+}
+
+@keyframes learn-shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+.learn-shake { animation: learn-shake 0.45s ease both; }

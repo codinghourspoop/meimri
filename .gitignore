@@ -1,5 +1,7 @@
 tmp/
 data/
 node_modules/
-static/css/app.css
+frontend/node_modules/
+frontend/.vite/
+static/dist/
 .direnv

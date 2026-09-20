@@ -3,7 +3,6 @@ module gitlab.com/coding4hours/memri
 go 1.26.5
 
 require (
-	github.com/a-h/templ v0.3.1020
 	github.com/alexedwards/argon2id v1.0.0
 	github.com/go-chi/chi/v5 v5.3.2
 	github.com/mattn/go-sqlite3 v1.14.52
@@ -13,8 +12,6 @@ require (
 
 require (
 	github.com/ebitengine/purego v0.9.1 // indirect
-	github.com/frostybee/go-swarm-icons v0.2.0 // indirect
-	github.com/frostybee/go-swarm-icons/lucide v0.2.0 // indirect
 	github.com/mfridman/interpolate v0.0.2 // indirect
 	github.com/sethvargo/go-retry v0.4.0 // indirect
 	github.com/tursodatabase/turso-go-platform-libs v0.7.2 // indirect

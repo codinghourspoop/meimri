@@ -11,7 +11,8 @@
       buildInputs = [
         pkgs.go
         pkgs.go-task
-        pkgs.tailwindcss_4
+        pkgs.bun
+        pkgs.nodejs_22
       ];
       GOFLAGS = "-mod=readonly";
       path = "${pkgs.coreutils}/bin";

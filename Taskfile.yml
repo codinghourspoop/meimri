@@ -2,24 +2,41 @@ version: "3"
 
 tasks:
   dev:
-    desc: Run templ, tailwind, and air in parallel
+    desc: Run Vite dev server and Go API with air in parallel
     cmds:
-      - templ generate --watch --proxy="http://localhost:8080" --open-browser=false &
-      - tailwindcss -i ./assets/css/input.css -o ./static/css/app.css --watch &
+      - task dev:frontend &
       - air
-    deps: [tailwind:download]
+    deps: [frontend:install]
+
+  dev:frontend:
+    desc: Vite dev server with /api proxy to :8080
+    dir: frontend
+    cmds:
+      - bun --bun run dev
+
+  dev:api:
+    desc: Go API only (Vite proxies /api here)
+    cmds:
+      - air
 
   build:
-    desc: Production build
+    desc: Production build (frontend bundle + Go binary)
     cmds:
-      - templ generate
-      - tailwindcss -i ./assets/css/input.css -o ./static/css/app.css --minify
+      - task frontend:build
       - go build -o ./tmp/main ./cmd/server
 
-  generate:
-    desc: Generate templ
+  frontend:install:
+    desc: Install frontend dependencies with bun
+    dir: frontend
     cmds:
-      - templ generate
+      - bun install
+
+  frontend:build:
+    desc: Build Svelte frontend into static/dist
+    dir: frontend
+    deps: [frontend:install]
+    cmds:
+      - bun --bun run build
 
   migrate:
     desc: Run goose migrations (sqlite3 dialect — Turso is SQLite-compatible)
@@ -29,9 +46,3 @@ tasks:
   migrate:down:
     cmds:
       - goose -dir db/migrations sqlite3 "${DATABASE_URL:-./data/app.db}" down
-
-  tailwind:download:
-    internal: true
-    cmds:
-      - mkdir -p static/css
-      - touch static/css/app.css
