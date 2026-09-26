@@ -32,7 +32,8 @@ type deckSearchJSON struct {
 	CardCount   int    `json:"card_count"`
 }
 
-// GET /api/decks/search?q= — empty query lists the user's decks, newest first.
+// GET /api/decks/search?q= — empty query returns no results;
+// search only runs once the user types.
 func (a *App) SearchDecks(w http.ResponseWriter, r *http.Request) {
 	userID := auth.UserID(r)
 	if userID == 0 {
@@ -41,37 +42,24 @@ func (a *App) SearchDecks(w http.ResponseWriter, r *http.Request) {
 	}
 
 	q := strings.TrimSpace(r.URL.Query().Get("q"))
-
-	var (
-		rows *sql.Rows
-		err  error
-	)
-
 	if q == "" {
-		rows, err = a.DB.QueryContext(
-			r.Context(),
-			`SELECT id, title, description, cards
-			 FROM deck
-			 WHERE user_id = ?
-			 ORDER BY created_at DESC, id DESC
-			 LIMIT 50`,
-			userID,
-		)
-	} else {
-		like := "%" + escapeLike(q) + "%"
-		rows, err = a.DB.QueryContext(
-			r.Context(),
-			`SELECT id, title, description, cards
-			 FROM deck
-			 WHERE user_id = ?
-			   AND (title LIKE ? ESCAPE '\' OR description LIKE ? ESCAPE '\')
-			 ORDER BY created_at DESC, id DESC
-			 LIMIT 50`,
-			userID,
-			like,
-			like,
-		)
+		writeJSON(w, http.StatusOK, []deckSearchJSON{})
+		return
 	}
+
+	like := "%" + escapeLike(q) + "%"
+	rows, err := a.DB.QueryContext(
+		r.Context(),
+		`SELECT id, title, description, cards
+		 FROM deck
+		 WHERE user_id = ?
+		   AND (title LIKE ? ESCAPE '\' OR description LIKE ? ESCAPE '\')
+		 ORDER BY created_at DESC, id DESC
+		 LIMIT 50`,
+		userID,
+		like,
+		like,
+	)
 	if err != nil {
 		log.Printf("SearchDecks database error: %v", err)
 		writeError(w, http.StatusInternalServerError, "failed to search decks")

@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { route, goto } from "./lib/router.js";
   import { session, loadMe } from "./lib/session.js";
+  import { Alert, AlertDescription } from "./lib/components/ui/alert/index.js";
   import Nav from "./components/Nav.svelte";
   import Home from "./pages/Home.svelte";
   import Login from "./pages/Login.svelte";
@@ -11,8 +12,9 @@
   import NewDeck from "./pages/NewDeck.svelte";
   import DeckView from "./pages/DeckView.svelte";
   import Learn from "./pages/Learn.svelte";
-  import Notifications from "./pages/Notifications.svelte";
+  import Test from "./pages/test.svelte";
   import { matchRoute } from "./lib/router.js";
+  import { ModeWatcher } from "mode-watcher";
 
   onMount(() => {
     loadMe();
@@ -38,38 +40,41 @@
   <title>memri</title>
 </svelte:head>
 
-<div class="min-h-screen bg-base-100 font-sans text-base-content antialiased">
+<ModeWatcher defaultMode="dark" />
+<div class="bg-background text-foreground min-h-screen font-sans antialiased">
   <Nav />
 
   <main class="mx-auto max-w-5xl px-4 py-8">
-  {#key path}
-    {#if $session.status === "loading"}
-    <div class="flex h-80 flex-col items-center justify-center gap-4">
-      <span class="loading loading-spinner loading-lg"></span>
-    </div>
-  {:else if path === "/"}
-    <Home />
-  {:else if path === "/login"}
-    <Login />
-  {:else if path === "/register"}
-    <Register />
-  {:else if path === "/recover"}
-    <Recover />
-  {:else if path === "/recovery-codes"}
-    <RecoveryCodes />
-  {:else if path === "/decks/new"}
-    <NewDeck />
-  {:else if path === "/notifications"}
-    <Notifications />
-  {:else if matchRoute("/decks/:id/learn", path)}
-    <Learn id={matchRoute("/decks/:id/learn", path).id} />
-  {:else if matchRoute("/decks/:id", path)}
-    <DeckView id={matchRoute("/decks/:id", path).id} />
-  {:else}
-    <div role="alert" class="alert mt-4">
-      <span class="text-sm">Page not found. <a href="/" class="link">Go home</a>.</span>
-    </div>
-    {/if}
+    {#key path}
+      {#if $session.status === "loading"}
+        <div class="flex h-80 flex-col items-center justify-center gap-4">
+          <span class="text-muted-foreground text-sm">Loading…</span>
+        </div>
+      {:else if path === "/"}
+        <Home />
+      {:else if path === "/login"}
+        <Login />
+      {:else if path === "/register"}
+        <Register />
+      {:else if path === "/recover"}
+        <Recover />
+      {:else if path === "/recovery-codes"}
+        <RecoveryCodes />
+      {:else if path === "/decks/new"}
+        <NewDeck />
+      {:else if path === "/test"}
+        <Test />
+      {:else if matchRoute("/decks/:id/learn", path)}
+        <Learn id={matchRoute("/decks/:id/learn", path).id} />
+      {:else if matchRoute("/decks/:id", path)}
+        <DeckView id={matchRoute("/decks/:id", path).id} />
+      {:else}
+        <Alert class="mt-4">
+          <AlertDescription class="text-sm">
+            Page not found. <a href="/" class="text-primary font-medium underline underline-offset-4">Go home</a>.
+          </AlertDescription>
+        </Alert>
+      {/if}
     {/key}
   </main>
 </div>

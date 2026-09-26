@@ -2,6 +2,8 @@
   import { pendingRecoveryCodes } from "../lib/session.js";
   import { goto } from "../lib/router.js";
   import { onMount } from "svelte";
+  import { Button } from "../lib/components/ui/button/index.js";
+  import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../lib/components/ui/card/index.js";
 
   let codes = $state(null);
   const unsub = pendingRecoveryCodes.subscribe((v) => (codes = v));
@@ -11,24 +13,24 @@
   });
 </script>
 
-<div class="mx-auto max-w-lg">
-  <div class="card bg-base-200 shadow-sm">
-    <div class="card-body">
-      <h1 class="card-title text-2xl">Save your recovery codes</h1>
-      <p class="text-sm text-base-content/80">
-        Store these somewhere safe. Each code can be used once to reset your password.
-        This is the only time they will be shown.
-      </p>
-      {#if codes}
-        <ul class="menu bg-base-100 mt-4 gap-1 rounded-box font-mono text-sm">
-          {#each codes as c}
-            <li><span class="kbd kbd-sm w-full justify-start">{c}</span></li>
-          {/each}
-        </ul>
-      {/if}
-      <div class="card-actions mt-4">
-        <a href="/" class="btn btn-primary">Continue to home</a>
-      </div>
+<Card class="bg-muted mx-auto max-w-lg">
+  <CardHeader>
+    <CardTitle class="text-2xl">Save your recovery codes</CardTitle>
+    <CardDescription>
+      Store these somewhere safe. Each code can be used once to reset your password. This is the only
+      time they will be shown.
+    </CardDescription>
+  </CardHeader>
+  <CardContent>
+    {#if codes}
+      <ul class="bg-card space-y-1 rounded-lg border p-4 font-mono text-sm">
+        {#each codes as c}
+          <li><code class="bg-muted block rounded px-2 py-1">{c}</code></li>
+        {/each}
+      </ul>
+    {/if}
+    <div class="mt-4">
+      <Button href="/">Continue to home</Button>
     </div>
-  </div>
-</div>
+  </CardContent>
+</Card>

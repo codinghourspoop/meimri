@@ -4,6 +4,12 @@
   import RotateCcw from "@lucide/svelte/icons/rotate-ccw";
   import Trophy from "@lucide/svelte/icons/trophy";
   import { api } from "../lib/api.js";
+  import { Button } from "../lib/components/ui/button/index.js";
+  import { Input } from "../lib/components/ui/input/index.js";
+  import { Alert, AlertDescription } from "../lib/components/ui/alert/index.js";
+  import { Progress } from "../lib/components/ui/progress/index.js";
+  import { Spinner } from "../lib/components/ui/spinner/index.js";
+  import { Separator } from "../lib/components/ui/separator/index.js";
 
   let { id } = $props();
 
@@ -38,7 +44,12 @@
   let progressLabel = $derived(`${doneUnits} of ${totalUnits}`);
 
   function norm(s) {
-    return (s || "").trim().replace(/\s+/g, " ").toLowerCase();
+    return stripHtml(s).replace(/\s+/g, " ").toLowerCase();
+  }
+  function stripHtml(html) {
+    const el = document.createElement("div");
+    el.innerHTML = html ?? "";
+    return (el.textContent || "").trim();
   }
   function shuffle(a) {
     for (let i = a.length - 1; i > 0; i--) {
@@ -139,16 +150,17 @@
   }
 
   function mcButtonClass(opt) {
-    if (feedback && opt.correct) return "border-success bg-success/10";
-    if (feedback && current.picked === current.options.indexOf(opt)) return "border-error bg-error/10 learn-shake";
-    if (feedback) return "border-base-300 opacity-60";
-    return "border-base-300 bg-base-100 hover:border-primary/60";
+    if (feedback && opt.correct) return "border-green-600 bg-green-600/10";
+    if (feedback && current.picked === current.options.indexOf(opt))
+      return "border-red-600 bg-red-600/10 learn-shake";
+    if (feedback) return "opacity-60";
+    return "hover:border-primary/60";
   }
 
   function mcBadgeClass(opt) {
-    if (feedback && opt.correct) return "bg-success text-success-content";
-    if (feedback && current.picked === current.options.indexOf(opt)) return "bg-error text-error-content";
-    return "bg-base-300 text-base-content/75";
+    if (feedback && opt.correct) return "bg-green-600 text-white";
+    if (feedback && current.picked === current.options.indexOf(opt)) return "bg-red-600 text-white";
+    return "bg-muted text-muted-foreground";
   }
 
   function restart() {
@@ -318,45 +330,47 @@
 <div class="mx-auto w-full max-w-lg">
   {#if loading}
     <div class="flex h-80 flex-col items-center justify-center gap-4">
-      <span class="loading loading-spinner loading-lg"></span>
-      <span class="text-sm text-base-content/75">Loading learn session...</span>
+      <Spinner class="size-8" />
+      <span class="text-muted-foreground text-sm">Loading learn session...</span>
     </div>
   {:else if loadError}
-    <div role="alert" class="alert mt-4"><span class="text-sm">{loadError}</span></div>
+    <Alert class="mt-4"><AlertDescription class="text-sm">{loadError}</AlertDescription></Alert>
   {:else}
     {#if !done}
       <div class="flex items-center gap-3">
-        <a
+        <Button
           href="/decks/{id}"
-          class="btn btn-circle btn-ghost btn-sm shrink-0"
+          variant="ghost"
+          size="icon-sm"
+          class="shrink-0"
           title="Exit to {title}"
           aria-label="Exit learn mode"
         >
           <X class="size-5" />
-        </a>
+        </Button>
         <div class="min-w-0 flex-1">
-          <div class="flex items-baseline justify-between text-xs text-base-content/75">
+          <div class="text-muted-foreground flex items-baseline justify-between text-xs">
             <span class="truncate font-medium">{progressLabel}</span>
             <span class="font-mono">{progress}%</span>
           </div>
-          <div class="mt-1 h-1.5 overflow-hidden rounded-full bg-base-300">
-            <div class="h-full rounded-full bg-primary transition-all duration-500" style="width: {progress}%"></div>
-          </div>
+          <Progress value={progress} max={100} class="mt-1 h-1.5" />
         </div>
-        <button
+        <Button
           type="button"
-          class="btn btn-circle btn-ghost btn-sm shrink-0"
+          variant="ghost"
+          size="icon-sm"
+          class="shrink-0"
           title="Restart session"
           aria-label="Restart session"
           onclick={restart}
         >
           <RotateCcw class="size-4" />
-        </button>
+        </Button>
       </div>
     {/if}
 
     {#if empty}
-      <div class="alert mt-6"><span class="text-sm">This deck has no cards yet.</span></div>
+      <Alert class="mt-6"><AlertDescription class="text-sm">This deck has no cards yet.</AlertDescription></Alert>
     {/if}
 
     {#if !done && !empty && current}
@@ -366,120 +380,90 @@
         {#if current.type === "mc"}
           <div class="mt-6 grid gap-2">
             {#each current.options as opt, i (i)}
-              <button
+              <Button
                 type="button"
+                variant="outline"
                 onclick={() => answerMC(i)}
                 disabled={!!feedback}
-                class="flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-all {mcButtonClass(opt)}"
+                class="h-auto w-full justify-start gap-3 p-3 text-left {mcButtonClass(opt)}"
               >
                 <span
-                  class="flex size-7 shrink-0 items-center justify-center rounded-md font-mono text-xs font-bold {mcBadgeClass(opt)}"
+                  class="flex size-7 shrink-0 items-center justify-center rounded-md font-mono text-xs font-bold {mcBadgeClass(
+                    opt,
+                  )}"
                 >
                   {String.fromCharCode(65 + i)}
                 </span>
                 <span class="flex-1">{opt.text}</span>
-              </button>
+              </Button>
             {/each}
             {#if feedback && !feedback.correct}
-              <button
-                type="button"
-                onclick={cont}
-                class="mt-1 w-full rounded-xl bg-error/10 p-3 text-center text-sm"
-              >
-                <span class="text-base-content/75">Correct answer: </span>
+              <Button type="button" variant="outline" onclick={cont} class="mt-1 w-full p-3 text-sm">
+                <span class="text-muted-foreground">Correct answer:&nbsp;</span>
                 <span class="font-bold">{current.back}</span>
-              </button>
+              </Button>
             {/if}
           </div>
         {:else if current.type === "tf"}
           <div class="mt-6">
-            <div class="rounded-xl border border-base-300 bg-base-100 p-5 text-center">
+            <div class="border-border bg-card rounded-xl border p-5 text-center">
               <p class="text-xl font-bold">{current.tfStatement}</p>
             </div>
             <div class="mt-2 grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onclick={() => answerTF(true)}
-                disabled={!!feedback}
-                class="flex items-center justify-center gap-2 rounded-xl border p-3 font-semibold transition-all {feedback && current.tfAnswer
-                  ? 'border-success bg-success/10'
-                  : feedback && current.picked === true
-                    ? 'border-error bg-error/10 learn-shake'
-                    : feedback
-                      ? 'border-base-300 opacity-60'
-                      : 'border-base-300 bg-base-100 hover:border-primary/60'}"
-              >
+              <Button type="button" variant="outline" onclick={() => answerTF(true)} disabled={!!feedback}>
                 <span
-                  class="flex size-7 shrink-0 items-center justify-center rounded-md bg-base-300 font-mono text-xs font-bold text-base-content/75"
+                  class="bg-muted text-muted-foreground flex size-7 shrink-0 items-center justify-center rounded-md font-mono text-xs font-bold"
                   >T</span
                 >
                 <span>True</span>
-              </button>
-              <button
-                type="button"
-                onclick={() => answerTF(false)}
-                disabled={!!feedback}
-                class="flex items-center justify-center gap-2 rounded-xl border p-3 font-semibold transition-all {feedback &&
-                !current.tfAnswer
-                  ? 'border-success bg-success/10'
-                  : feedback && current.picked === false
-                    ? 'border-error bg-error/10 learn-shake'
-                    : feedback
-                      ? 'border-base-300 opacity-60'
-                      : 'border-base-300 bg-base-100 hover:border-primary/60'}"
-              >
+              </Button>
+              <Button type="button" variant="outline" onclick={() => answerTF(false)} disabled={!!feedback}>
                 <span
-                  class="flex size-7 shrink-0 items-center justify-center rounded-md bg-base-300 font-mono text-xs font-bold text-base-content/75"
+                  class="bg-muted text-muted-foreground flex size-7 shrink-0 items-center justify-center rounded-md font-mono text-xs font-bold"
                   >F</span
                 >
                 <span>False</span>
-              </button>
+              </Button>
             </div>
             {#if feedback && !feedback.correct}
-              <button
-                type="button"
-                onclick={cont}
-                class="mt-2 w-full rounded-xl bg-error/10 p-3 text-center text-sm"
-              >
-                <span class="text-base-content/75">Correct answer: </span>
+              <Button type="button" variant="outline" onclick={cont} class="mt-2 w-full p-3 text-sm">
+                <span class="text-muted-foreground">Correct answer:&nbsp;</span>
                 <span class="font-bold">{current.back}</span>
-              </button>
+              </Button>
             {/if}
           </div>
         {:else if current.type === "written"}
           <div class="mt-6">
-            <input
+            <Input
               type="text"
               placeholder="Type the answer"
               autocomplete="off"
-              class="input input-lg input-bordered w-full text-center"
-              class:input-success={feedback?.correct}
-              class:input-error={feedback && !feedback.correct}
+              class="h-12 text-center text-lg"
               bind:value={answer}
               disabled={!!feedback}
             />
             {#if feedback && !feedback.correct}
               <div class="mt-3 text-center text-sm">
                 <p>
-                  <span class="text-base-content/75">Correct answer: </span><span class="font-bold"
+                  <span class="text-muted-foreground">Correct answer: </span><span class="font-bold"
                     >{current.back}</span
                   >
                 </p>
                 {#if answer}
-                  <p class="mt-0.5 text-base-content/75">You wrote: <span>{answer}</span></p>
+                  <p class="text-muted-foreground mt-0.5">You wrote: <span>{answer}</span></p>
                 {/if}
               </div>
             {/if}
             {#if !feedback}
               <div class="mt-3">
-                <button type="button" class="btn btn-primary btn-block" onclick={submitWritten}>Check</button>
-                <button type="button" class="btn btn-ghost btn-block btn-sm mt-1" onclick={dontKnow}
-                  >I don't know</button
+                <Button type="button" class="w-full" onclick={submitWritten}>Check</Button>
+                <Button type="button" variant="ghost" size="sm" class="mt-1 w-full" onclick={dontKnow}
+                  >I don't know</Button
                 >
               </div>
             {/if}
             {#if feedback && !feedback.correct}
-              <button type="button" class="btn btn-primary btn-block mt-3" onclick={cont}>Continue</button>
+              <Button type="button" class="mt-3 w-full" onclick={cont}>Continue</Button>
             {/if}
           </div>
         {/if}
@@ -487,13 +471,14 @@
     {/if}
 
     {#if done}
+      {@const missedItems = missedList()}
       <div class="mt-8 text-center">
-        <div class="mx-auto flex size-16 items-center justify-center rounded-full bg-primary/15 text-primary">
+        <div class="bg-primary/15 text-primary mx-auto flex size-16 items-center justify-center rounded-full">
           <Trophy class="size-7" />
         </div>
         <h2 class="mt-3 text-xl font-bold">Session complete</h2>
-        <p class="mt-4 text-sm text-base-content/75">
-          <span class="font-mono font-bold text-base-content"
+        <p class="text-muted-foreground mt-4 text-sm">
+          <span class="text-foreground font-mono font-bold"
             >{total ? Math.round((correctFirst / total) * 100) : 0}</span
           ><span class="font-mono">% correct first try · </span><span class="font-mono">{attempts}</span><span
             class="font-mono"
@@ -501,21 +486,21 @@
             attempts</span
           >
         </p>
-        {#if missedList().length > 0}
+        {#if missedItems.length > 0}
           <div class="mt-5 text-left">
-            <ul class="divide-y divide-base-300 overflow-hidden rounded-xl border border-base-300">
-              {#each missedList() as m, i (i)}
+            <ul class="divide-border divide-y overflow-hidden rounded-xl border">
+              {#each missedItems as m, i (i)}
                 <li class="flex items-baseline justify-between gap-4 px-4 py-2.5 text-sm">
                   <span class="font-semibold">{m.front}</span>
-                  <span class="text-right text-base-content/75">{m.back}</span>
+                  <span class="text-muted-foreground text-right">{m.back}</span>
                 </li>
               {/each}
             </ul>
           </div>
         {/if}
         <div class="mt-5 flex justify-center gap-2">
-          <button type="button" class="btn btn-primary" onclick={restart}>Study again</button>
-          <a href="/decks/{id}" class="btn btn-ghost">Flashcards</a>
+          <Button type="button" onclick={restart}>Study again</Button>
+          <Button href="/decks/{id}" variant="ghost">Flashcards</Button>
         </div>
       </div>
     {/if}

@@ -4,6 +4,10 @@
   import { api } from "../lib/api.js";
   import { loadMe } from "../lib/session.js";
   import { goto } from "../lib/router.js";
+  import { Button } from "../lib/components/ui/button/index.js";
+  import { Input } from "../lib/components/ui/input/index.js";
+  import { Card, CardContent, CardHeader, CardTitle } from "../lib/components/ui/card/index.js";
+  import { Alert, AlertDescription } from "../lib/components/ui/alert/index.js";
 
   let username = $state("");
   let password = $state("");
@@ -26,25 +30,36 @@
   }
 </script>
 
-<div class="mx-auto max-w-sm">
-  <h1 class="text-2xl font-bold">Login</h1>
-  {#if err}
-    <div role="alert" class="alert alert-error mt-3"><span>{err}</span></div>
-  {/if}
-  <form onsubmit={submit} class="mt-6 space-y-4">
-    <label class="input w-full">
-      <User class="size-5" />
-      <input name="username" required placeholder="Username" class="w-full" bind:value={username} />
-    </label>
-    <label class="input w-full">
-      <Lock class="size-5" />
-      <input name="password" placeholder="Password" type="password" required class="w-full" bind:value={password} />
-    </label>
-    <div class="flex w-full justify-center">
-      <button type="submit" class="btn btn-primary btn-wide" disabled={busy}>Login</button>
-    </div>
-  </form>
-  <p class="mt-4 text-center text-sm">
-    <a href="/recover" class="link">Recover with code</a> · <a href="/register" class="link">Register</a>
-  </p>
-</div>
+<Card class="mx-auto max-w-sm">
+  <CardHeader>
+    <CardTitle class="text-2xl">Login</CardTitle>
+  </CardHeader>
+  <CardContent>
+    {#if err}
+      <Alert variant="destructive" class="mb-4"><AlertDescription>{err}</AlertDescription></Alert>
+    {/if}
+    <form onsubmit={submit} class="space-y-4">
+      <div class="relative">
+        <User class="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+        <Input name="username" required placeholder="Username" class="pl-9" bind:value={username} />
+      </div>
+      <div class="relative">
+        <Lock class="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+        <Input
+          name="password"
+          placeholder="Password"
+          type="password"
+          required
+          class="pl-9"
+          bind:value={password}
+        />
+      </div>
+      <Button type="submit" class="w-full" disabled={busy}>Login</Button>
+    </form>
+    <p class="mt-4 text-center text-sm">
+      <Button href="/recover" variant="link" class="h-auto p-0 text-sm">Recover with code</Button>
+      <span class="text-muted-foreground"> · </span>
+      <Button href="/register" variant="link" class="h-auto p-0 text-sm">Register</Button>
+    </p>
+  </CardContent>
+</Card>
