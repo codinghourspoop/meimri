@@ -8,6 +8,7 @@
   import { Alert, AlertDescription } from "../lib/components/ui/alert/index.js";
   import { Spinner } from "../lib/components/ui/spinner/index.js";
   import { Kbd } from "../lib/components/ui/kbd/index.js";
+  import CardHtml from "../components/CardHtml.svelte";
 
   let { id } = $props();
 
@@ -97,12 +98,12 @@
                 <div
                   class="border-border bg-card absolute inset-0 flex items-center justify-center overflow-y-auto rounded-xl border p-8 text-center shadow-xl [backface-visibility:hidden]"
                 >
-                  <div class="text-xl font-medium [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:text-left [&_ol]:text-left [&_img]:max-w-full [&_img]:rounded-lg">{@html item.front}</div>
+                  <div class="text-xl font-medium"><CardHtml html={item.front} /></div>
                 </div>
                 <div
                   class="border-primary/20 bg-primary/10 absolute inset-0 flex items-center justify-center overflow-y-auto rounded-xl border p-8 text-center shadow-xl [backface-visibility:hidden] [transform:rotateX(180deg)]"
                 >
-                  <div class="text-lg [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:text-left [&_ol]:text-left [&_img]:max-w-full [&_img]:rounded-lg">{@html item.back}</div>
+                  <div class="text-lg"><CardHtml html={item.back} /></div>
                 </div>
               </button>
             </div>

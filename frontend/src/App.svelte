@@ -10,6 +10,7 @@
   import Recover from "./pages/Recover.svelte";
   import RecoveryCodes from "./pages/RecoveryCodes.svelte";
   import NewDeck from "./pages/NewDeck.svelte";
+  import Settings from "./pages/Settings.svelte";
   import DeckView from "./pages/DeckView.svelte";
   import Learn from "./pages/Learn.svelte";
   import Test from "./pages/test.svelte";
@@ -62,6 +63,8 @@
         <RecoveryCodes />
       {:else if path === "/decks/new"}
         <NewDeck />
+      {:else if path === "/settings"}
+        <Settings />
       {:else if path === "/test"}
         <Test />
       {:else if matchRoute("/decks/:id/learn", path)}

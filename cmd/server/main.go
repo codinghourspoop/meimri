@@ -1,12 +1,16 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
+	"syscall"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -35,8 +39,8 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(auth.CSRF)
 	r.Use(store.LoginLoader)
+	r.Use(auth.CSRF)
 
 	// JSON API (consumed by the Svelte SPA).
 	r.Get("/api/me", app.Me)
@@ -44,6 +48,9 @@ func main() {
 	r.Post("/api/auth/register", app.DoRegister)
 	r.Post("/api/auth/recover", app.DoRecover)
 	r.Post("/api/auth/logout", app.DoLogout)
+	r.Post("/api/auth/recovery-codes", app.RegenerateRecoveryCodes)
+	r.Get("/api/settings", app.ReadSettings)
+	r.Put("/api/settings", app.UpdateSettings)
 	r.Get("/api/decks/search", app.SearchDecks)
 	r.Post("/api/decks", app.CreateDeck)
 	r.Get("/api/decks/{id}", app.ReadDeck)
@@ -60,8 +67,23 @@ func main() {
 	r.Get("/*", spaHandler())
 
 	addr := env("ADDR", ":8080")
-	log.Printf("listening on %s", addr)
-	log.Fatal(http.ListenAndServe(addr, r))
+	srv := &http.Server{Addr: addr, Handler: r}
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		log.Printf("listening on %s", addr)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Printf("server error: %v", err)
+		}
+	}()
+
+	<-stop
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Printf("graceful shutdown failed: %v", err)
+	}
 }
 
 func serveDistFile(name, contentType string) http.HandlerFunc {

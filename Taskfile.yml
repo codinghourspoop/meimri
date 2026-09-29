@@ -2,47 +2,47 @@ version: "3"
 
 tasks:
   dev:
-    desc: Run Vite dev server and Go API with air in parallel
+    desc: Run
     cmds:
       - task dev:frontend &
-      - air
+      - dotenvx run -- air
     deps: [frontend:install]
 
   dev:frontend:
-    desc: Vite dev server with /api proxy to :8080
+    desc: Vite
     dir: frontend
     cmds:
       - bun --bun run dev
 
   dev:api:
-    desc: Go API only (Vite proxies /api here)
+    desc: Go backend
     cmds:
-      - air
+      - dotenvx run -- air
 
   build:
-    desc: Production build (frontend bundle + Go binary)
+    desc: Production
     cmds:
       - task frontend:build
       - go build -o ./tmp/main ./cmd/server
 
   frontend:install:
-    desc: Install frontend dependencies with bun
+    desc: Install deps
     dir: frontend
     cmds:
       - bun install
 
   frontend:build:
-    desc: Build Svelte frontend into static/dist
+    desc: Build frontend
     dir: frontend
     deps: [frontend:install]
     cmds:
       - bun --bun run build
 
   migrate:
-    desc: Run goose migrations (sqlite3 dialect — Turso is SQLite-compatible)
+    desc: Run  migrations
     cmds:
-      - goose -dir db/migrations sqlite3 "${DATABASE_URL:-./data/app.db}" up
+      - dotenvx run -- sh -c 'goose -dir db/migrations sqlite3 "${DATABASE_URL:-./data/app.db}" up'
 
   migrate:down:
     cmds:
-      - goose -dir db/migrations sqlite3 "${DATABASE_URL:-./data/app.db}" down
+      - dotenvx run -- sh -c 'goose -dir db/migrations sqlite3 "${DATABASE_URL:-./data/app.db}" down'

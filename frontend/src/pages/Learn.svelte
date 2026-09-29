@@ -4,18 +4,22 @@
   import RotateCcw from "@lucide/svelte/icons/rotate-ccw";
   import Trophy from "@lucide/svelte/icons/trophy";
   import { api } from "../lib/api.js";
+  import { loadSettings } from "../lib/settings.js";
   import { Button } from "../lib/components/ui/button/index.js";
   import { Input } from "../lib/components/ui/input/index.js";
   import { Alert, AlertDescription } from "../lib/components/ui/alert/index.js";
   import { Progress } from "../lib/components/ui/progress/index.js";
   import { Spinner } from "../lib/components/ui/spinner/index.js";
   import { Separator } from "../lib/components/ui/separator/index.js";
+  import CardHtml from "../components/CardHtml.svelte";
 
   let { id } = $props();
 
   const params = new URLSearchParams(window.location.search);
-  const passesParam = parseInt(params.get("passes") ?? "3", 10);
-  const passesRequired = passesParam >= 1 && passesParam <= 10 ? passesParam : 3;
+  const passesParam = parseInt(params.get("passes") ?? "", 10);
+  // Resolved in onMount: an explicit ?passes= wins, otherwise the account's
+  // saved default applies, which may still be in flight on the first render.
+  let passesRequired = 3;
 
   let title = $state("");
   let cards = $state([]);
@@ -306,6 +310,11 @@
   onMount(async () => {
     window.addEventListener("keydown", onKey);
     try {
+      const saved = await loadSettings();
+      passesRequired =
+        passesParam >= 1 && passesParam <= 10
+          ? passesParam
+          : Math.min(10, Math.max(1, saved?.default_passes ?? 3));
       const data = await api.getLearn(id, passesRequired);
       title = data.title;
       cards = (data.cards || []).filter((c) => c && (c.front !== "" || c.back !== ""));
@@ -375,7 +384,7 @@
 
     {#if !done && !empty && current}
       <div class="mt-6">
-        <p class="min-h-24 text-center text-2xl font-bold text-balance">{current.front}</p>
+        <CardHtml html={current.front} class="min-h-24 text-center text-2xl font-bold text-balance" />
 
         {#if current.type === "mc"}
           <div class="mt-6 grid gap-2">
@@ -394,20 +403,20 @@
                 >
                   {String.fromCharCode(65 + i)}
                 </span>
-                <span class="flex-1">{opt.text}</span>
+                <CardHtml html={opt.text} tag="span" class="flex-1 text-left" />
               </Button>
             {/each}
             {#if feedback && !feedback.correct}
               <Button type="button" variant="outline" onclick={cont} class="mt-1 w-full p-3 text-sm">
                 <span class="text-muted-foreground">Correct answer:&nbsp;</span>
-                <span class="font-bold">{current.back}</span>
+                <CardHtml html={current.back} tag="span" class="font-bold" />
               </Button>
             {/if}
           </div>
         {:else if current.type === "tf"}
           <div class="mt-6">
             <div class="border-border bg-card rounded-xl border p-5 text-center">
-              <p class="text-xl font-bold">{current.tfStatement}</p>
+              <CardHtml html={current.tfStatement} class="text-xl font-bold" />
             </div>
             <div class="mt-2 grid grid-cols-2 gap-2">
               <Button type="button" variant="outline" onclick={() => answerTF(true)} disabled={!!feedback}>
@@ -428,7 +437,7 @@
             {#if feedback && !feedback.correct}
               <Button type="button" variant="outline" onclick={cont} class="mt-2 w-full p-3 text-sm">
                 <span class="text-muted-foreground">Correct answer:&nbsp;</span>
-                <span class="font-bold">{current.back}</span>
+                <CardHtml html={current.back} tag="span" class="font-bold" />
               </Button>
             {/if}
           </div>
@@ -445,9 +454,11 @@
             {#if feedback && !feedback.correct}
               <div class="mt-3 text-center text-sm">
                 <p>
-                  <span class="text-muted-foreground">Correct answer: </span><span class="font-bold"
-                    >{current.back}</span
-                  >
+                  <span class="text-muted-foreground">Correct answer: </span><CardHtml
+                    html={current.back}
+                    tag="span"
+                    class="inline font-bold"
+                  />
                 </p>
                 {#if answer}
                   <p class="text-muted-foreground mt-0.5">You wrote: <span>{answer}</span></p>
@@ -491,8 +502,8 @@
             <ul class="divide-border divide-y overflow-hidden rounded-xl border">
               {#each missedItems as m, i (i)}
                 <li class="flex items-baseline justify-between gap-4 px-4 py-2.5 text-sm">
-                  <span class="font-semibold">{m.front}</span>
-                  <span class="text-muted-foreground text-right">{m.back}</span>
+                  <CardHtml html={m.front} tag="span" class="font-semibold" />
+                  <CardHtml html={m.back} tag="span" class="text-muted-foreground text-right" />
                 </li>
               {/each}
             </ul>

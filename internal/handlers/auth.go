@@ -38,8 +38,8 @@ func (a *App) DoLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var id int64
-	var hash string
-	err := a.DB.QueryRow(`SELECT id, password_hash FROM user WHERE username = ? COLLATE NOCASE`, input.Username).Scan(&id, &hash)
+	var hash, username, displayName string
+	err := a.DB.QueryRow(`SELECT id, password_hash, username, display_name FROM user WHERE username = ? COLLATE NOCASE`, input.Username).Scan(&id, &hash, &username, &displayName)
 	if err == sql.ErrNoRows {
 		_ = auth.VerifyPassword("$argon2id$v=19$m=19456,t=2,p=1$dummy$dummy", input.Password)
 		writeError(w, http.StatusUnauthorized, "Invalid username or password.")
@@ -59,10 +59,9 @@ func (a *App) DoLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	auth.SetSessionCookie(w, r, token)
-	_, username, displayName, unread := a.currentUser(r)
 	writeJSON(w, http.StatusOK, map[string]any{
 		"user":   userJSON{ID: id, Username: username, DisplayName: displayName},
-		"unread": unread,
+		"unread": a.unreadCount(id),
 	})
 }
 
@@ -102,7 +101,7 @@ func (a *App) DoRegister(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusConflict, "Username already taken.")
 		return
 	}
-	codes, _ := auth.GenerateRecoveryCodes(8)
+	codes, _ := auth.GenerateRecoveryCodes(recoveryCodeCount)
 	for _, c := range codes {
 		h, _ := auth.HashPassword(c)
 		_, _ = a.DB.Exec(`INSERT INTO recovery_codes (user_id, code_hash) VALUES (?, ?)`, userID, h)

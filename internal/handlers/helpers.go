@@ -18,6 +18,10 @@ type CardInput struct {
 	Back  string `json:"back"`
 }
 
+// recoveryCodeCount is how many one-time codes an account is issued at
+// registration and again on every regeneration.
+const recoveryCodeCount = 8
+
 func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
@@ -45,7 +49,13 @@ func (a *App) currentUser(r *http.Request) (id int64, username, displayName stri
 		DisplayName string
 	}
 	_ = a.DB.QueryRow(`SELECT username, display_name FROM user WHERE id = ?`, uid).Scan(&u.Username, &u.DisplayName)
+	return uid, u.Username, u.DisplayName, a.unreadCount(uid)
+}
+
+// unreadCount reports a user's unread notifications. It is used directly by the
+// login handler, where the request has no session loaded yet.
+func (a *App) unreadCount(userID int64) int64 {
 	var c int64
-	_ = a.DB.QueryRow(`SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0`, uid).Scan(&c)
-	return uid, u.Username, u.DisplayName, c
+	_ = a.DB.QueryRow(`SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0`, userID).Scan(&c)
+	return c
 }

@@ -58,6 +58,19 @@ export interface Deck extends DeckSummary {
   cards: DeckCard[];
 }
 
+export type Theme = "light" | "dark" | "system";
+
+/** Everything the settings page can read and write. Username is server-owned. */
+export interface Settings {
+  username: string;
+  display_name: string;
+  default_passes: number;
+  theme: Theme;
+}
+
+/** The writable subset of Settings that PUT /api/settings accepts. */
+export type SettingsInput = Omit<Settings, "username">;
+
 export const api = {
   get: <T = any>(path: string) => request<T>(path),
   post: <T = any>(path: string, body: unknown) => request<T>(path, { method: "POST", body: body ?? {} }),
@@ -69,6 +82,11 @@ export const api = {
   recover: (username: string, code: string, password: string) =>
     request("/api/auth/recover", { method: "POST", body: { username, code, password } }),
   logout: () => request("/api/auth/logout", { method: "POST", body: {} }),
+  regenerateRecoveryCodes: () =>
+    request<{ recovery_codes: string[] }>("/api/auth/recovery-codes", { method: "POST", body: {} }),
+  getSettings: () => request<Settings>("/api/settings"),
+  updateSettings: (settings: SettingsInput) =>
+    request<Settings>("/api/settings", { method: "PUT", body: settings }),
   searchDecks: (q: string) => request<DeckSummary[]>(`/api/decks/search?q=${encodeURIComponent(q ?? "")}`),
   createDeck: (title: string, description: string, cards: DeckCard[]) =>
     request("/api/decks", { method: "POST", body: { title, description, cards } }),

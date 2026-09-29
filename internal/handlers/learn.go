@@ -57,12 +57,13 @@ func (a *App) ReadLearn(w http.ResponseWriter, r *http.Request) {
 	if deck.Cards == nil {
 		deck.Cards = []CardInput{}
 	}
+	passes := parsePasses(r)
 
 	writeJSON(w, http.StatusOK, map[string]any{
 		"id":          deck.ID,
 		"title":       deck.Title,
 		"description": deck.Description,
 		"cards":       deck.Cards,
-		"passes":      parsePasses(r),
+		"passes":      passes,
 	})
 }

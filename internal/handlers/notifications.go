@@ -117,6 +117,6 @@ func (a *App) MarkNotificationsRead(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
-	_, _ = a.DB.Exec(`UPDATE notifications SET is_read = 1 WHERE user_id = ? AND is_read = 0`, uid)
+	_, _ = a.DB.ExecContext(r.Context(), `UPDATE notifications SET is_read = 1 WHERE user_id = ? AND is_read = 0`, uid)
 	writeJSON(w, http.StatusOK, map[string]bool{"ok": true})
 }
